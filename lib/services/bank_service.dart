@@ -3,69 +3,15 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/account_model.dart';
+import '../models/transaction_model.dart';
+
 /// ข้อความ error ที่จะโชว์ให้ผู้ใช้เห็นตรงๆ
 class BankException implements Exception {
   final String message;
   BankException(this.message);
   @override
   String toString() => message;
-}
-
-class Account {
-  final String accountNumber;
-  final String name;
-  final String email;
-  final double balance;
-
-  Account({
-    required this.accountNumber,
-    required this.name,
-    required this.email,
-    required this.balance,
-  });
-
-  factory Account.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final d = doc.data()!;
-    return Account(
-      accountNumber: d['accountNumber'] as String,
-      name: d['name'] as String,
-      email: d['email'] as String,
-      balance: (d['balance'] as num).toDouble(),
-    );
-  }
-}
-
-class BankTransaction {
-  final String type; // 'transfer' หรือ 'withdraw'
-  final String from;
-  final String fromName;
-  final String? to;
-  final String? toName;
-  final double amount;
-  final DateTime createdAt;
-
-  BankTransaction({
-    required this.type,
-    required this.from,
-    required this.fromName,
-    required this.to,
-    required this.toName,
-    required this.amount,
-    required this.createdAt,
-  });
-
-  factory BankTransaction.fromMap(Map<String, dynamic> d) {
-    final ts = d['createdAt'];
-    return BankTransaction(
-      type: d['type'] as String,
-      from: d['from'] as String,
-      fromName: d['fromName'] as String,
-      to: d['to'] as String?,
-      toName: d['toName'] as String?,
-      amount: (d['amount'] as num).toDouble(),
-      createdAt: ts is Timestamp ? ts.toDate() : DateTime.now(),
-    );
-  }
 }
 
 /// โครงสร้างข้อมูลใน Firestore
@@ -87,9 +33,9 @@ class BankService {
   final _random = Random();
 
   CollectionReference<Map<String, dynamic>> get _users =>
-      _db.collection('users');
+      _db.collection(AccountModel.collectionName);
   CollectionReference<Map<String, dynamic>> get _transactions =>
-      _db.collection('transactions');
+      _db.collection(TransactionModel.collectionName);
 
   /// บัญชีที่ login อยู่ตอนนี้ (currentUserId = ID ของ document = อีเมล)
   String? currentUserId;
@@ -142,12 +88,15 @@ class BankService {
       // ใช้อีเมล (ตัวพิมพ์เล็ก) เป็น ID ของ document
       final docId = credential.user!.email!;
       final accountNumber = await _generateUniqueAccountNumber();
+      final account = AccountModel(
+        uid: credential.user!.uid,
+        email: docId,
+        accountNumber: accountNumber,
+        name: name,
+        balance: startingBalance,
+      );
       await _users.doc(docId).set({
-        'uid': credential.user!.uid,
-        'email': docId,
-        'accountNumber': accountNumber,
-        'name': name,
-        'balance': startingBalance,
+        ...account.toJson(),
         'createdAt': FieldValue.serverTimestamp(),
       });
       currentUserId = docId;
@@ -244,11 +193,11 @@ class BankService {
 
   // ---------------------------------------------------------------- Read
 
-  Stream<Account> watchAccount(String userId) => _users
+  Stream<AccountModel> watchAccount(String userId) => _users
       .doc(userId)
       .snapshots()
       .where((doc) => doc.exists) // ข้ามตอนที่ document ถูกลบ (ลบบัญชี)
-      .map(Account.fromDoc);
+      .map((doc) => AccountModel.fromJson(doc.data()!));
 
   /// หา document ของ user จากเลขบัญชี (null ถ้าไม่มีบัญชีนี้)
   Future<DocumentSnapshot<Map<String, dynamic>>?> _userDocByAccountNumber(
@@ -266,20 +215,20 @@ class BankService {
   ) async => (await _userDocByAccountNumber(accountNumber))?.reference;
 
   /// หาเจ้าของบัญชีจากเลขบัญชี (null ถ้าไม่มีบัญชีนี้)
-  Future<Account?> findAccount(String accountNumber) async {
+  Future<AccountModel?> findAccount(String accountNumber) async {
     final doc = await _userDocByAccountNumber(accountNumber);
-    return doc == null ? null : Account.fromDoc(doc);
+    return doc == null ? null : AccountModel.fromJson(doc.data()!);
   }
 
   /// ประวัติรายการของบัญชี เรียงใหม่สุดก่อน
   /// (เรียงฝั่งแอพ จะได้ไม่ต้องสร้าง composite index ใน Firestore)
-  Stream<List<BankTransaction>> watchHistory(String accountNumber) {
+  Stream<List<TransactionModel>> watchHistory(String accountNumber) {
     return _transactions
         .where('participants', arrayContains: accountNumber)
         .snapshots()
         .map((snap) {
           final list = snap.docs
-              .map((d) => BankTransaction.fromMap(d.data()))
+              .map((d) => TransactionModel.fromJson(d.data()))
               .toList();
           list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           return list;
@@ -316,16 +265,15 @@ class BankService {
 
       tx.update(fromRef, {'balance': FieldValue.increment(-amount)});
       tx.update(toRef, {'balance': FieldValue.increment(amount)});
-      tx.set(_transactions.doc(), {
-        'type': 'transfer',
-        'from': fromAccount,
-        'fromName': fromSnap['name'],
-        'to': toAccount,
-        'toName': toSnap['name'],
-        'amount': amount,
-        'participants': [fromAccount, toAccount],
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      final record = TransactionModel(
+        type: 'transfer',
+        from: fromAccount,
+        fromName: fromSnap['name'],
+        to: toAccount,
+        toName: toSnap['name'],
+        amount: amount,
+      );
+      tx.set(_transactions.doc(), record.toJson());
       return null;
     });
     if (error != null) throw BankException(error);
@@ -345,16 +293,13 @@ class BankService {
       if (amount > balance) return 'เงินในบัญชีไม่เพียงพอ';
 
       tx.update(ref, {'balance': FieldValue.increment(-amount)});
-      tx.set(_transactions.doc(), {
-        'type': 'withdraw',
-        'from': accountNumber,
-        'fromName': snap['name'],
-        'to': null,
-        'toName': null,
-        'amount': amount,
-        'participants': [accountNumber],
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      final record = TransactionModel(
+        type: 'withdraw',
+        from: accountNumber,
+        fromName: snap['name'],
+        amount: amount,
+      );
+      tx.set(_transactions.doc(), record.toJson());
       return null;
     });
     if (error != null) throw BankException(error);

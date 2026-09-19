@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../services/bank_service.dart';
+import '../models/account_model.dart';
 import '../widgets/common.dart';
 import 'exchange_rate_page.dart';
 import 'receive_page.dart';
@@ -10,7 +10,7 @@ import 'withdraw_page.dart';
 
 /// หน้าธุรกรรม: ปุ่มเมนู 5 ปุ่ม โอนเงิน, สแกน, รับเงิน, ถอนเงิน, ค่าเงิน
 class MenuPage extends StatelessWidget {
-  final Account account;
+  final AccountModel account;
   const MenuPage({super.key, required this.account});
 
   void _open(BuildContext context, Widget page) {

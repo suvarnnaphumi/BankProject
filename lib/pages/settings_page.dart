@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/account_model.dart';
 import '../services/bank_service.dart';
 import '../widgets/common.dart';
 import 'login_page.dart';
@@ -7,7 +8,7 @@ import 'login_page.dart';
 /// แท็บตั้งค่า: ดูข้อมูลบัญชี และลบบัญชีผู้ใช้
 /// (ปุ่มออกจากระบบอยู่มุมขวาบนของหน้าหลัก)
 class SettingsPage extends StatelessWidget {
-  final Account account;
+  final AccountModel account;
   const SettingsPage({super.key, required this.account});
 
   Future<void> _deleteAccount(BuildContext context) async {

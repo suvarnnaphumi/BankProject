@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../models/account_model.dart';
 import '../services/bank_service.dart';
 
 // ---------------------------------------------------------------- สี (ตามไฟล์ bank_UI.pdf)
@@ -244,7 +245,7 @@ class ShadowCard extends StatelessWidget {
 
 /// การ์ดยอดเงินสีเขียว (ใช้ในหน้าหลัก, โอนเงิน, ถอนเงิน)
 class BalanceCard extends StatelessWidget {
-  final Account account;
+  final AccountModel account;
   const BalanceCard({super.key, required this.account});
 
   @override

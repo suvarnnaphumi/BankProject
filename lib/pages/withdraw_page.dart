@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/account_model.dart';
 import '../services/bank_service.dart';
 import '../widgets/common.dart';
 
@@ -67,7 +68,7 @@ class _WithdrawPageState extends State<WithdrawPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SectionLabel('จาก'),
-              StreamBuilder<Account>(
+              StreamBuilder<AccountModel>(
                 stream: BankService.instance.watchAccount(userId),
                 builder: (context, snap) => snap.hasData
                     ? BalanceCard(account: snap.data!)

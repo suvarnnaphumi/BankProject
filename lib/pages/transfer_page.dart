@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/account_model.dart';
 import '../services/bank_service.dart';
 import '../widgets/common.dart';
 import 'scan_page.dart';
@@ -19,7 +20,7 @@ class _TransferPageState extends State<TransferPage> {
   final _accountNumber = TextEditingController();
   final _amount = TextEditingController();
 
-  Account? _receiver; // เจ้าของบัญชีปลายทางที่ค้นเจอ
+  AccountModel? _receiver; // เจ้าของบัญชีปลายทางที่ค้นเจอ
   bool _searching = false;
   bool _sending = false;
 
@@ -148,7 +149,7 @@ class _TransferPageState extends State<TransferPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SectionLabel('จาก'),
-              StreamBuilder<Account>(
+              StreamBuilder<AccountModel>(
                 stream: BankService.instance.watchAccount(userId),
                 builder: (context, snap) => snap.hasData
                     ? BalanceCard(account: snap.data!)
@@ -212,7 +213,7 @@ class _TransferPageState extends State<TransferPage> {
 
 /// กล่องสีเทาแสดงชื่อ + เลขบัญชีของผู้รับ
 class _ReceiverBox extends StatelessWidget {
-  final Account account;
+  final AccountModel account;
   const _ReceiverBox({required this.account});
 
   @override

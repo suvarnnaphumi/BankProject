@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../models/account_model.dart';
+import '../models/transaction_model.dart';
 import '../services/bank_service.dart';
 import '../widgets/common.dart';
 import 'login_page.dart';
@@ -71,7 +73,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: userId == null
           ? const SizedBox()
-          : StreamBuilder<Account>(
+          : StreamBuilder<AccountModel>(
               stream: BankService.instance.watchAccount(userId),
               builder: (context, snap) {
                 if (snap.hasError) {
@@ -160,7 +162,7 @@ class _BottomBar extends StatelessWidget {
 /// เนื้อหาแท็บหน้าหลัก
 
 class _HomeTab extends StatelessWidget {
-  final Account account;
+  final AccountModel account;
   const _HomeTab({required this.account});
 
   @override
@@ -185,7 +187,7 @@ class _History extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy HH.mm');
 
-    return StreamBuilder<List<BankTransaction>>(
+    return StreamBuilder<List<TransactionModel>>(
       stream: BankService.instance.watchHistory(accountNumber),
       builder: (context, snap) {
         if (snap.hasError) return Text(errorMessage(snap.error!));

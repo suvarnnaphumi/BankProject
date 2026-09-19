@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../models/exchange_rate_model.dart';
 import '../services/exchange_rate_service.dart';
 import '../widgets/common.dart';
 
@@ -15,7 +16,7 @@ class ExchangeRatePage extends StatefulWidget {
 }
 
 class _ExchangeRatePageState extends State<ExchangeRatePage> {
-  late Future<ExchangeRates> _future;
+  late Future<ExchangeRateModel> _future;
 
   @override
   void initState() {
@@ -37,7 +38,7 @@ class _ExchangeRatePageState extends State<ExchangeRatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('อัตราแลกเปลี่ยน')),
-      body: FutureBuilder<ExchangeRates>(
+      body: FutureBuilder<ExchangeRateModel>(
         future: _future,
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
@@ -81,7 +82,7 @@ class _ExchangeRatePageState extends State<ExchangeRatePage> {
 
 class _RateTile extends StatelessWidget {
   final String code;
-  final ExchangeRates rates;
+  final ExchangeRateModel rates;
   const _RateTile({required this.code, required this.rates});
 
   @override
@@ -123,7 +124,7 @@ class _RateTile extends StatelessWidget {
 
 /// เครื่องแปลงค่าเงิน บาท <-> สกุลเงินที่เลือก
 class _Converter extends StatefulWidget {
-  final ExchangeRates rates;
+  final ExchangeRateModel rates;
   final double initialThb;
   const _Converter({required this.rates, required this.initialThb});
 

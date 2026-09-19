@@ -1,27 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../models/team_member_model.dart';
 import '../widgets/common.dart';
 
 /// แท็บสมาชิกในกลุ่ม: โชว์ชื่อ-นามสกุล, รหัสนิสิต, เลขที่
-class TeamMember {
-  final String name; // ชื่อ-นามสกุล
-  final String studentId; // รหัสนิสิต
-  final int number; // เลขที่
-
-  const TeamMember({
-    required this.name,
-    required this.studentId,
-    required this.number,
-  });
-}
-
-const teamMembers = <TeamMember>[
-  TeamMember(
+// แก้ข้อมูลสมาชิกในกลุ่มตรงนี้
+const teamMembers = <TeamMemberModel>[
+  TeamMemberModel(
     name: 'นาย สุวรรณภูมิ พรัดขำ',
     studentId: '6721602733',
     number: 43,
   ),
-  TeamMember(
+  TeamMemberModel(
     name: 'นางสาว มิววริช ทศทิศรังสรรค์',
     studentId: '6721602555',
     number: 26,
