@@ -3,17 +3,12 @@ import 'package:intl/intl.dart';
 
 import '../services/bank_service.dart';
 import '../widgets/common.dart';
-import 'exchange_rate_page.dart';
 import 'login_page.dart';
-import 'receive_page.dart';
-import 'scan_page.dart';
+import 'menu_page.dart';
 import 'settings_page.dart';
 import 'team_page.dart';
-import 'transfer_page.dart';
-import 'withdraw_page.dart';
 
-/// หน้าหลักหลังล็อกอิน: มีแถบเมนูด้านล่าง 4 แท็บ
-/// หน้าหลัก (ยอดเงิน + รายการย้อนหลัง) / ธุรกรรม (ปุ่มเมนู) / ตั้งค่า / สมาชิก
+/// หน้าหลักหลังล็อกอิน: แสดงยอดเงิน + รายการย้อนหลัง + แถบเมนูด้านล่าง 4 แท็บ
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -91,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                   index: _tab,
                   children: [
                     _HomeTab(account: account),
-                    _MenuTab(account: account),
+                    MenuPage(account: account),
                     SettingsPage(account: account),
                     const TeamPage(),
                   ],
@@ -106,7 +101,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ---------------------------------------------------------------- แถบเมนูล่าง
+/// แถบเมนูล่าง
 
 class _BottomBar extends StatelessWidget {
   final int index;
@@ -162,7 +157,7 @@ class _BottomBar extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------- แท็บหน้าหลัก
+/// เนื้อหาแท็บหน้าหลัก
 
 class _HomeTab extends StatelessWidget {
   final Account account;
@@ -270,83 +265,6 @@ class _History extends StatelessWidget {
           }).toList(),
         );
       },
-    );
-  }
-}
-
-// ---------------------------------------------------------------- แท็บธุรกรรม (ปุ่มเมนู)
-
-class _MenuTab extends StatelessWidget {
-  final Account account;
-  const _MenuTab({required this.account});
-
-  void _open(BuildContext context, Widget page) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
-  }
-
-  /// สแกน QR แล้วเปิดหน้าโอนเงิน พร้อมใส่เลขบัญชีที่สแกนได้ให้เลย
-  Future<void> _scanAndTransfer(BuildContext context) async {
-    final accountNumber = await Navigator.push<String>(
-      context,
-      MaterialPageRoute(builder: (_) => const ScanPage()),
-    );
-    if (accountNumber == null || !context.mounted) return;
-    _open(context, TransferPage(initialAccountNumber: accountNumber));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final items = [
-      (
-        Icons.account_balance,
-        'โอนเงิน',
-        () => _open(context, const TransferPage()),
-      ),
-      (Icons.qr_code_scanner, 'สแกน', () => _scanAndTransfer(context)),
-      (
-        Icons.qr_code_2,
-        'รับเงิน',
-        () => _open(context, ReceivePage(account: account)),
-      ),
-      (
-        Icons.credit_card,
-        'ถอนเงิน',
-        () => _open(context, const WithdrawPage()),
-      ),
-      (
-        Icons.swap_horiz,
-        'ค่าเงิน',
-        () => _open(context, ExchangeRatePage(balance: account.balance)),
-      ),
-    ];
-
-    return GridView.count(
-      padding: const EdgeInsets.fromLTRB(28, 24, 28, 24),
-      crossAxisCount: 3,
-      mainAxisSpacing: 24,
-      crossAxisSpacing: 24,
-      children: [
-        for (final (icon, label, onTap) in items)
-          ShadowCard(
-            padding: EdgeInsets.zero,
-            margin: EdgeInsets.zero,
-            onTap: onTap,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 48, color: brandColor),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
     );
   }
 }
