@@ -4,9 +4,11 @@ import '../services/bank_service.dart';
 import '../widgets/common.dart';
 import 'scan_page.dart';
 
-/// โอนเงิน: กรอกเลขบัญชีเอง หรือเลือกแทบสแกน QR (ซึ่งจะเติมเลขบัญชีให้อัตโนมัติ)
+/// โอนเงิน: กรอกเลขบัญชีเอง หรือกดไอคอนสแกน QR (ซึ่งจะเติมเลขบัญชีให้อัตโนมัติ)
 class TransferPage extends StatefulWidget {
-  const TransferPage({super.key});
+  /// เลขบัญชีปลายทางที่ได้จากการสแกน QR (ถ้ามี จะใส่ไว้ในช่องให้เลย)
+  final String? initialAccountNumber;
+  const TransferPage({super.key, this.initialAccountNumber});
 
   @override
   State<TransferPage> createState() => _TransferPageState();
@@ -22,6 +24,19 @@ class _TransferPageState extends State<TransferPage> {
   bool _sending = false;
 
   String get _myAccount => BankService.instance.currentAccountNumber!;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialAccountNumber;
+    if (initial != null) {
+      _accountNumber.text = initial;
+      // รอให้หน้าวาดเสร็จก่อน แล้วค่อยค้นชื่อเจ้าของบัญชี
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _lookupReceiver(initial),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -68,36 +83,28 @@ class _TransferPageState extends State<TransferPage> {
     }
     final amount = double.parse(_amount.text.trim());
 
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('ยืนยันการโอนเงิน'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('ไปยัง: ${receiver.name}'),
-            Text('เลขบัญชี: ${formatAccountNumber(receiver.accountNumber)}'),
-            const SizedBox(height: 8),
-            Text(
-              'จำนวน: ${formatMoney(amount)}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('ยกเลิก'),
+    final ok = await showConfirmDialog(
+      context,
+      title: 'ยืนยันการโอนเงิน',
+      confirmLabel: 'ยืนยัน',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('ไปยัง: ${receiver.name}', style: const TextStyle(fontSize: 16)),
+          Text(
+            'เลขบัญชี: ${formatAccountNumber(receiver.accountNumber)}',
+            style: const TextStyle(fontSize: 16),
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('ยืนยัน'),
+          const SizedBox(height: 16),
+          Text(
+            'จำนวน: ${formatMoney(amount)}',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
           ),
         ],
       ),
     );
-    if (ok != true || !mounted) return;
+    if (!ok || !mounted) return;
 
     setState(() => _sending = true);
     try {
@@ -111,7 +118,7 @@ class _TransferPageState extends State<TransferPage> {
         context,
         success: true,
         title: 'โอนเงินสำเร็จ',
-        message: 'โอน ${formatMoney(amount)}\nให้ ${receiver.name}',
+        message: 'จำนวน ${formatMoney(amount)}\nให้ ${receiver.name}',
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -129,54 +136,50 @@ class _TransferPageState extends State<TransferPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = BankService.instance.currentUserId!;
+
     return Scaffold(
       appBar: AppBar(title: const Text('โอนเงิน')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(32, 24, 32, 32),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              OutlinedButton.icon(
-                onPressed: _scanQr,
-                icon: const Icon(Icons.qr_code_scanner, size: 28),
-                label: const Text('สแกน QR Code'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
+              const SectionLabel('จาก'),
+              StreamBuilder<Account>(
+                stream: BankService.instance.watchAccount(userId),
+                builder: (context, snap) => snap.hasData
+                    ? BalanceCard(account: snap.data!)
+                    : const SizedBox(height: 160),
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Row(
-                  children: [
-                    Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Text('หรือกรอกเลขบัญชี'),
-                    ),
-                    Expanded(child: Divider()),
-                  ],
-                ),
-              ),
+              const SizedBox(height: 24),
+              const SectionLabel('ไปยัง'),
               TextFormField(
                 controller: _accountNumber,
                 keyboardType: TextInputType.number,
                 maxLength: 10,
                 decoration: InputDecoration(
-                  labelText: 'เลขบัญชีปลายทาง (10 หลัก)',
+                  hintText: 'เลขบัญชีปลายทาง (10 หลัก)',
                   prefixIcon: const Icon(Icons.account_balance),
-                  border: const OutlineInputBorder(),
                   suffixIcon: _searching
                       ? const Padding(
-                          padding: EdgeInsets.all(12),
+                          padding: EdgeInsets.all(14),
                           child: SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                         )
-                      : null,
+                      : IconButton(
+                          tooltip: 'สแกน QR Code',
+                          icon: const Icon(
+                            Icons.qr_code_scanner,
+                            color: brandColor,
+                          ),
+                          onPressed: _scanQr,
+                        ),
                 ),
                 onChanged: _lookupReceiver,
                 validator: (v) {
@@ -188,31 +191,59 @@ class _TransferPageState extends State<TransferPage> {
                   return null;
                 },
               ),
-              if (_receiver != null)
-                Card(
-                  color: Colors.green.shade50,
-                  child: ListTile(
-                    leading: const Icon(Icons.person, color: brandColor),
-                    title: Text(_receiver!.name),
-                    subtitle: Text(
-                      formatAccountNumber(_receiver!.accountNumber),
-                    ),
-                  ),
-                ),
+              if (_receiver != null) ...[
+                const SizedBox(height: 4),
+                _ReceiverBox(account: _receiver!),
+              ],
               const SizedBox(height: 16),
               AmountField(controller: _amount),
-              const SizedBox(height: 24),
-              FilledButton.icon(
+              const SizedBox(height: 28),
+              FilledButton(
                 onPressed: _sending ? null : _confirmAndSend,
-                icon: const Icon(Icons.send),
-                label: const Text('โอนเงิน'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
+                child: _sending ? const ButtonLoading() : const Text('ถัดไป'),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// กล่องสีเทาแสดงชื่อ + เลขบัญชีของผู้รับ
+class _ReceiverBox extends StatelessWidget {
+  final Account account;
+  const _ReceiverBox({required this.account});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      decoration: BoxDecoration(
+        color: greyBoxColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.person, color: brandColor, size: 40),
+          const SizedBox(width: 20),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                account.name,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                formatAccountNumber(account.accountNumber),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

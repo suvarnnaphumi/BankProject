@@ -19,14 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'My Bank',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: brandColor),
-        useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: brandColor,
-          foregroundColor: Colors.white,
-        ),
-      ),
+      theme: buildAppTheme(),
       home: const LoginPage(),
     );
   }

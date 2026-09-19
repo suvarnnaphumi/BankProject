@@ -53,13 +53,13 @@ class _ExchangeRatePageState extends State<ExchangeRatePage> {
           return RefreshIndicator(
             onRefresh: _refresh,
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(32, 32, 32, 32),
               children: [
                 _Converter(rates: rates, initialThb: widget.balance),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 const Text(
                   'อัตราแลกเปลี่ยนวันนี้',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
                 ),
                 Text(
                   'อัปเดตล่าสุด '
@@ -67,7 +67,7 @@ class _ExchangeRatePageState extends State<ExchangeRatePage> {
                   '  •  ดึงข้อมูลจาก open.er-api.com',
                   style: const TextStyle(color: Colors.black54, fontSize: 12),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 for (final code in rates.rates.keys)
                   _RateTile(code: code, rates: rates),
               ],
@@ -92,14 +92,30 @@ class _RateTile extends StatelessWidget {
     final text = thb < 1
         ? '${NumberFormat('#,##0.0000').format(thb)} ฿'
         : formatMoney(thb);
-    return Card(
-      child: ListTile(
-        title: Text(name),
-        subtitle: Text('1 $code'),
-        trailing: Text(
-          text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+    return ShadowCard(
+      padding: const EdgeInsets.fromLTRB(28, 16, 28, 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text('1 $code', style: const TextStyle(fontSize: 15)),
+              ],
+            ),
+          ),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          ),
+        ],
       ),
     );
   }
@@ -137,75 +153,65 @@ class _ConverterState extends State<_Converter> {
     final fromCode = _thbToForeign ? 'THB' : _currency;
     final toCode = _thbToForeign ? _currency : 'THB';
 
-    return Card(
-      color: Colors.green.shade50,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'แปลงค่าเงิน',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              initialValue: _currency,
-              decoration: const InputDecoration(
-                labelText: 'สกุลเงิน',
-                border: OutlineInputBorder(),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-              items: [
-                for (final code in widget.rates.rates.keys)
-                  DropdownMenuItem(
-                    value: code,
-                    child: Text(
-                      '$code  ${ExchangeRateService.currencies[code]}',
-                    ),
-                  ),
-              ],
-              onChanged: (v) => setState(() => _currency = v!),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _amount,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: 'จำนวน ($fromCode)',
-                      border: const OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    onChanged: (_) => setState(() {}),
-                  ),
+    const fieldLabel = TextStyle(fontSize: 15, color: Colors.black54);
+    const denseField = EdgeInsets.symmetric(horizontal: 16, vertical: 12);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+      decoration: BoxDecoration(
+        color: brandColor,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'แปลงค่าเงิน',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 4),
+          const Text('  สกุลเงิน', style: fieldLabel),
+          DropdownButtonFormField<String>(
+            initialValue: _currency,
+            iconEnabledColor: brandColor,
+            decoration: const InputDecoration(contentPadding: denseField),
+            items: [
+              for (final code in widget.rates.rates.keys)
+                DropdownMenuItem(
+                  value: code,
+                  child: Text('$code  ${ExchangeRateService.currencies[code]}'),
                 ),
-                IconButton(
-                  tooltip: 'สลับทิศทาง',
-                  icon: const Icon(Icons.swap_horiz, color: brandColor),
-                  onPressed: () =>
-                      setState(() => _thbToForeign = !_thbToForeign),
+            ],
+            onChanged: (v) => setState(() => _currency = v!),
+          ),
+          const SizedBox(height: 8),
+          Text('  จำนวนเงิน ($fromCode)', style: fieldLabel),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _amount,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(contentPadding: denseField),
+                  onChanged: (_) => setState(() {}),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '= ${NumberFormat('#,##0.00').format(result)} $toCode',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: brandColor,
               ),
-            ),
-          ],
-        ),
+              IconButton(
+                tooltip: 'สลับทิศทาง',
+                icon: const Icon(Icons.swap_horiz, size: 32),
+                onPressed: () => setState(() => _thbToForeign = !_thbToForeign),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            '= ${NumberFormat('#,##0.00').format(result)} $toCode',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
+          ),
+        ],
       ),
     );
   }

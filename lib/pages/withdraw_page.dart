@@ -36,7 +36,7 @@ class _WithdrawPageState extends State<WithdrawPage> {
         context,
         success: true,
         title: 'ถอนเงินสำเร็จ',
-        message: 'ถอนเงินจำนวน ${formatMoney(amount)}',
+        message: 'จำนวน ${formatMoney(amount)}',
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -55,46 +55,30 @@ class _WithdrawPageState extends State<WithdrawPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = BankService.instance.currentUserId!;
+
     return Scaffold(
       appBar: AppBar(title: const Text('ถอนเงิน')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(32, 24, 32, 32),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SectionLabel('จาก'),
               StreamBuilder<Account>(
-                stream: BankService.instance.watchAccount(
-                  BankService.instance.currentUserId!,
-                ),
-                builder: (context, snap) => Card(
-                  child: ListTile(
-                    leading: const Icon(
-                      Icons.account_balance_wallet,
-                      color: brandColor,
-                    ),
-                    title: const Text('ยอดเงินคงเหลือ'),
-                    trailing: Text(
-                      snap.hasData ? formatMoney(snap.data!.balance) : '...',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
+                stream: BankService.instance.watchAccount(userId),
+                builder: (context, snap) => snap.hasData
+                    ? BalanceCard(account: snap.data!)
+                    : const SizedBox(height: 160),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               AmountField(controller: _amount),
-              const SizedBox(height: 24),
-              FilledButton.icon(
+              const SizedBox(height: 28),
+              FilledButton(
                 onPressed: _loading ? null : _withdraw,
-                icon: const Icon(Icons.atm),
-                label: const Text('ถอนเงิน'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
+                child: _loading ? const ButtonLoading() : const Text('ถัดไป'),
               ),
             ],
           ),

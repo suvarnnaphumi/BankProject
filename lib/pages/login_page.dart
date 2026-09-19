@@ -49,73 +49,81 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(32),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
-                    Icons.account_balance,
-                    size: 80,
-                    color: brandColor,
-                  ),
-                  const SizedBox(height: 8),
                   const Text(
                     'My Bank',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 56,
+                      fontWeight: FontWeight.w700,
                       color: brandColor,
                     ),
                   ),
                   const SizedBox(height: 32),
+                  const Text(
+                    'เข้าสู่ระบบ',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 24),
                   TextFormField(
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
-                      labelText: 'อีเมล',
+                      hintText: 'อีเมล',
                       prefixIcon: Icon(Icons.email),
-                      border: OutlineInputBorder(),
                     ),
                     validator: (v) =>
                         (v ?? '').trim().isEmpty ? 'กรุณากรอกอีเมล' : null,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: _password,
                     obscureText: true,
                     decoration: const InputDecoration(
-                      labelText: 'รหัสผ่าน',
+                      hintText: 'รหัสผ่าน',
                       prefixIcon: Icon(Icons.lock),
-                      border: OutlineInputBorder(),
                     ),
                     validator: (v) =>
                         (v ?? '').isEmpty ? 'กรุณากรอกรหัสผ่าน' : null,
                     onFieldSubmitted: (_) => _login(),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
                   FilledButton(
                     onPressed: _loading ? null : _login,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
                     child: _loading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                        ? const ButtonLoading()
                         : const Text('เข้าสู่ระบบ'),
                   ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const RegisterPage()),
-                    ),
-                    child: const Text('ยังไม่มีบัญชี? สมัครสมาชิก'),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'ยังไม่มีบัญชี?  ',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const RegisterPage(),
+                          ),
+                        ),
+                        child: const Text(
+                          'สมัครสมาชิก',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: linkColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

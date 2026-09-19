@@ -58,42 +58,39 @@ class _RegisterPageState extends State<RegisterPage> {
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        title: const Text('สมัครสำเร็จ!', textAlign: TextAlign.center),
+        title: const Text(
+          'สมัครสมาชิกสำเร็จ!',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('เลขบัญชีของคุณคือ'),
-            const SizedBox(height: 4),
+            const Text('เลขบัญชีของคุณคือ', style: TextStyle(fontSize: 16)),
             Text(
               formatAccountNumber(accountNumber),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             SizedBox(
-              width: 180,
-              height: 180,
-              child: QrImageView(
-                data: BankService.qrDataFor(accountNumber),
-                backgroundColor: Colors.white,
-              ),
+              width: 200,
+              height: 200,
+              child: QrImageView(data: BankService.qrDataFor(accountNumber)),
             ),
-            const SizedBox(height: 8),
             Text(
-              'QR code นี้เป็นของบัญชีนี้\nได้รับเงินเริ่มต้น '
-              '${formatMoney(BankService.startingBalance)}',
-              textAlign: TextAlign.center,
+              'ได้รับเงินเริ่มต้น ${formatMoney(BankService.startingBalance)}',
               style: const TextStyle(color: Colors.black54),
             ),
           ],
         ),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('เริ่มใช้งาน'),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('เริ่มใช้งาน'),
+            ),
           ),
         ],
       ),
@@ -105,7 +102,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('สมัครสมาชิก')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Form(
           key: _formKey,
           child: Column(
@@ -114,21 +111,19 @@ class _RegisterPageState extends State<RegisterPage> {
               TextFormField(
                 controller: _name,
                 decoration: const InputDecoration(
-                  labelText: 'ชื่อ-นามสกุล',
+                  hintText: 'ชื่อ-นามสกุล',
                   prefixIcon: Icon(Icons.badge),
-                  border: OutlineInputBorder(),
                 ),
                 validator: (v) =>
                     (v ?? '').trim().isEmpty ? 'กรุณากรอกชื่อ-นามสกุล' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
-                  labelText: 'อีเมล (ใช้ตอนเข้าสู่ระบบ)',
+                  hintText: 'อีเมล',
                   prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
                 ),
                 validator: (v) {
                   final t = (v ?? '').trim();
@@ -139,32 +134,24 @@ class _RegisterPageState extends State<RegisterPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _password,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: 'รหัสผ่าน (อย่างน้อย 6 ตัว)',
+                  hintText: 'รหัสผ่าน (อย่างน้อย 6 ตัว)',
                   prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(),
                 ),
                 validator: (v) => (v ?? '').length < 6
                     ? 'รหัสผ่านต้องมีอย่างน้อย 6 ตัว'
                     : null,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               FilledButton(
                 onPressed: _loading ? null : _register,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
                 child: _loading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('สมัครและสร้างบัญชี'),
+                    ? const ButtonLoading()
+                    : const Text('สร้างบัญชี'),
               ),
             ],
           ),

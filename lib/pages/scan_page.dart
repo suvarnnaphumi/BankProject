@@ -45,9 +45,11 @@ class _ScanPageState extends State<ScanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('สแกน QR เพื่อโอนเงิน'),
+        centerTitle: true,
+        title: const Text('สแกน QR code'),
         actions: [
           IconButton(
+            tooltip: 'ไฟฉาย',
             icon: const Icon(Icons.flash_on),
             onPressed: () => _controller.toggleTorch(),
           ),
@@ -59,22 +61,33 @@ class _ScanPageState extends State<ScanPage> {
           // กรอบเล็งตรงกลาง
           Center(
             child: Container(
-              width: 250,
-              height: 250,
+              width: 260,
+              height: 260,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 3),
-                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: brandColor, width: 4),
+                borderRadius: BorderRadius.circular(24),
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             left: 0,
             right: 0,
-            bottom: 48,
-            child: Text(
-              'เล็ง QR code ให้อยู่ในกรอบ',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 16),
+            bottom: 56,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: const Text(
+                  'วาง QR code ให้อยู่ในกรอบ',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              ),
             ),
           ),
         ],

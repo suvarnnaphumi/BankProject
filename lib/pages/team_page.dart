@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/common.dart';
 
-/// หน้าแสดงสมาชิกในกลุ่ม: โชว์ชื่อ-นามสกุล, รหัสนิสิต, เลขที่
+/// แท็บสมาชิกในกลุ่ม: โชว์ชื่อ-นามสกุล, รหัสนิสิต, เลขที่
 class TeamMember {
   final String name; // ชื่อ-นามสกุล
   final String studentId; // รหัสนิสิต
@@ -33,56 +33,35 @@ class TeamPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('สมาชิกในกลุ่ม')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          for (final member in teamMembers) _MemberCard(member: member),
-        ],
-      ),
-    );
-  }
-}
-
-class _MemberCard extends StatelessWidget {
-  final TeamMember member;
-  const _MemberCard({required this.member});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: brandColor,
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.person, size: 32),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    member.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        for (final member in teamMembers)
+          ShadowCard(
+            padding: const EdgeInsets.fromLTRB(32, 24, 32, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  member.name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
                   ),
-                  const SizedBox(height: 4),
-                  Text('รหัสนิสิต ${member.studentId}'),
-                  Text('เลขที่ ${member.number}'),
-                ],
-              ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'รหัสนิสิต  ${member.studentId}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Text(
+                  'เลขที่ ${member.number}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 }
