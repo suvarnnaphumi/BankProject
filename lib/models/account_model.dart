@@ -34,7 +34,6 @@ class AccountModel {
       name: json['name'] ?? '',
       // ใช้ .toDouble() เสมอ ไม่ว่าค่าจาก Firestore จะเป็น int หรือ double
       balance: (json['balance'] as num? ?? 0).toDouble(),
-      // บัญชีที่สมัครก่อนมีระบบออมจะไม่มีช่องนี้ -> ถือว่าเป็น 0
       savingsBalance: (json['savingsBalance'] as num? ?? 0).toDouble(),
       photo: photo == null ? null : base64Decode(photo),
     );
