@@ -1,12 +1,16 @@
-/// ข้อมูลสมาชิกในกลุ่ม 1 คน (ใช้ในแท็บสมาชิก ไม่ได้เก็บใน Firestore)
+/// ข้อมูลสมาชิกในกลุ่ม 1 คน
 class TeamMemberModel {
-  final String name; // ชื่อ-นามสกุล
-  final String studentId; // รหัสนิสิต
-  final int number; // เลขที่
+  final String name;
+  final String studentId;
+  final int number;
+
+  /// ที่อยู่ไฟล์รูปโปรไฟล์ เช่น 'assets/images/member1.png' (ไม่ใส่ก็ได้)
+  final String? imagePath;
 
   const TeamMemberModel({
     required this.name,
     required this.studentId,
     required this.number,
+    this.imagePath,
   });
 }

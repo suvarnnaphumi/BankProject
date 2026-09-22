@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import '../services/bank_service.dart';
+import '../services/auth_service.dart';
+import '../services/qr_service.dart';
 import '../widgets/common.dart';
 import 'home_page.dart';
 
@@ -32,7 +33,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     try {
-      final accountNumber = await BankService.instance.register(
+      final accountNumber = await AuthService.instance.register(
         name: _name.text.trim(),
         email: _email.text.trim(),
         password: _password.text,
@@ -75,10 +76,10 @@ class _RegisterPageState extends State<RegisterPage> {
             SizedBox(
               width: 200,
               height: 200,
-              child: QrImageView(data: BankService.qrDataFor(accountNumber)),
+              child: QrImageView(data: QrService.dataFor(accountNumber)),
             ),
             Text(
-              'ได้รับเงินเริ่มต้น ${formatMoney(BankService.startingBalance)}',
+              'ได้รับเงินเริ่มต้น ${formatMoney(AuthService.startingBalance)}',
               style: const TextStyle(color: Colors.black54),
             ),
           ],

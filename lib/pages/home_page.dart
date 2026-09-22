@@ -3,7 +3,9 @@ import 'package:intl/intl.dart';
 
 import '../models/account_model.dart';
 import '../models/transaction_model.dart';
-import '../services/bank_service.dart';
+import '../services/account_service.dart';
+import '../services/auth_service.dart';
+import '../services/transaction_service.dart';
 import '../widgets/common.dart';
 import 'login_page.dart';
 import 'menu_page.dart';
@@ -35,7 +37,7 @@ class _HomePageState extends State<HomePage> {
     );
     if (!ok) return;
 
-    await BankService.instance.logout();
+    await AuthService.instance.logout();
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
@@ -46,7 +48,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = BankService.instance.currentUserId;
+    final userId = AuthService.instance.currentUserId;
 
     return Scaffold(
       appBar: AppBar(
@@ -74,7 +76,7 @@ class _HomePageState extends State<HomePage> {
       body: userId == null
           ? const SizedBox()
           : StreamBuilder<AccountModel>(
-              stream: BankService.instance.watchAccount(userId),
+              stream: AccountService.instance.watchAccount(userId),
               builder: (context, snap) {
                 if (snap.hasError) {
                   return Center(child: Text(errorMessage(snap.error!)));
@@ -170,7 +172,7 @@ class _HomeTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       children: [
-        BalanceCard(account: account),
+        BalanceCard(account: account, showPhoto: true),
         const SizedBox(height: 16),
         const SectionLabel('รายการย้อนหลัง'),
         _History(accountNumber: account.accountNumber),
@@ -188,7 +190,7 @@ class _History extends StatelessWidget {
     final dateFormat = DateFormat('dd/MM/yyyy HH.mm');
 
     return StreamBuilder<List<TransactionModel>>(
-      stream: BankService.instance.watchHistory(accountNumber),
+      stream: TransactionService.instance.watchHistory(accountNumber),
       builder: (context, snap) {
         if (snap.hasError) return Text(errorMessage(snap.error!));
         if (!snap.hasData) {
@@ -217,8 +219,18 @@ class _History extends StatelessWidget {
             final bool incoming;
             if (t.type == 'withdraw') {
               title = 'ถอนเงิน';
-              icon = const Icon(Icons.credit_card, size: 40);
+              icon = const Icon(Icons.credit_card, color: brandColor, size: 40);
               incoming = false;
+            } else if (t.type == 'savings_deposit') {
+              // ย้ายเงินไปบัญชีออม = เงินออกจากยอดหลัก
+              title = 'ฝากเงินออม';
+              icon = const Icon(Icons.savings, color: brandColor, size: 40);
+              incoming = false;
+            } else if (t.type == 'savings_withdraw') {
+              // ย้ายเงินออมกลับมา = เงินเข้ายอดหลัก
+              title = 'ถอนเงินออม';
+              icon = const Icon(Icons.savings, color: brandColor, size: 40);
+              incoming = true;
             } else if (t.to == accountNumber) {
               title = 'รับเงินจาก ${t.fromName}';
               icon = const Icon(Icons.south_west, color: incomeColor, size: 36);

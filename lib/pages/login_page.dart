@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../services/bank_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/common.dart';
 import 'home_page.dart';
 import 'register_page.dart';
@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     try {
-      await BankService.instance.login(_email.text.trim(), _password.text);
+      await AuthService.instance.login(_email.text.trim(), _password.text);
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -49,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.fromLTRB(32, 32, 32, 50),
             child: Form(
               key: _formKey,
               child: Column(
@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
                     'My Bank',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 56,
+                      fontSize: 60,
                       fontWeight: FontWeight.w700,
                       color: brandColor,
                     ),
@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                     'เข้าสู่ระบบ',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                     validator: (v) =>
                         (v ?? '').trim().isEmpty ? 'กรุณากรอกอีเมล' : null,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
                   TextFormField(
                     controller: _password,
                     obscureText: true,

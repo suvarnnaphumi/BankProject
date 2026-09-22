@@ -10,11 +10,13 @@ const teamMembers = <TeamMemberModel>[
     name: 'นาย สุวรรณภูมิ พรัดขำ',
     studentId: '6721602733',
     number: 43,
+    imagePath: 'assets/images/member/member1.jpg',
   ),
   TeamMemberModel(
     name: 'นางสาว มิววริช ทศทิศรังสรรค์',
     studentId: '6721602555',
     number: 26,
+    imagePath: 'assets/images/member/member2.jpg',
   ),
 ];
 
@@ -28,25 +30,33 @@ class TeamPage extends StatelessWidget {
       children: [
         for (final member in teamMembers)
           ShadowCard(
-            padding: const EdgeInsets.fromLTRB(32, 24, 32, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+            child: Row(
               children: [
-                Text(
-                  member.name,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
+                ProfileAvatar(imagePath: member.imagePath, size: 72),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        member.name,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'รหัสนิสิต  ${member.studentId}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        'เลขที่ ${member.number}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'รหัสนิสิต  ${member.studentId}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                Text(
-                  'เลขที่ ${member.number}',
-                  style: const TextStyle(fontSize: 16),
                 ),
               ],
             ),

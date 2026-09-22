@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../models/account_model.dart';
-import '../services/bank_service.dart';
+import '../services/qr_service.dart';
 import '../widgets/common.dart';
 
 /// หน้ารับเงิน: โชว์ QR code และเลขบัญชีของเรา ให้คนอื่นเอาไปโอน
@@ -26,7 +26,7 @@ class ReceivePage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               QrImageView(
-                data: BankService.qrDataFor(account.accountNumber),
+                data: QrService.dataFor(account.accountNumber),
                 size: 260,
               ),
               const SizedBox(height: 32),

@@ -4,15 +4,11 @@ import 'package:http/http.dart' as http;
 
 import '../models/exchange_rate_model.dart';
 
-/// เรียก API ภายนอก ExchangeRate-API (https://open.er-api.com)
-/// ฟรี ไม่ต้องใช้ API key ข้อมูลอัปเดตวันละครั้ง
+/// เรียก API ภายนอก ExchangeRate-API (https://open.er-api.com) ไม่ต้องใช้ API key ข้อมูลอัปเดตวันละครั้ง
 class ExchangeRateService {
   ExchangeRateService._();
   static final instance = ExchangeRateService._();
-
   static const _url = 'https://open.er-api.com/v6/latest/THB';
-
-  /// สกุลเงินที่จะโชว์ในแอพ พร้อมชื่อภาษาไทยและธง
   static const currencies = <String, String>{
     'USD': '🇺🇸 ดอลลาร์สหรัฐ',
     'EUR': '🇪🇺 ยูโร',

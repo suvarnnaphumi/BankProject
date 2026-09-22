@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../models/account_model.dart';
-import '../services/bank_service.dart';
+import '../services/account_service.dart';
+import '../services/auth_service.dart';
+import '../services/withdraw_service.dart';
 import '../widgets/common.dart';
 
 /// หน้าถอนเงิน: กรอกจำนวนเงินที่ต้องการถอน แล้วกดถอน (จะตัดเงินออกจากบัญชีของเรา)
@@ -28,8 +30,8 @@ class _WithdrawPageState extends State<WithdrawPage> {
     final amount = double.parse(_amount.text.trim());
     setState(() => _loading = true);
     try {
-      await BankService.instance.withdraw(
-        accountNumber: BankService.instance.currentAccountNumber!,
+      await WithdrawService.instance.withdraw(
+        accountNumber: AuthService.instance.currentAccountNumber!,
         amount: amount,
       );
       if (!mounted) return;
@@ -56,7 +58,7 @@ class _WithdrawPageState extends State<WithdrawPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = BankService.instance.currentUserId!;
+    final userId = AuthService.instance.currentUserId!;
 
     return Scaffold(
       appBar: AppBar(title: const Text('ถอนเงิน')),
@@ -69,7 +71,7 @@ class _WithdrawPageState extends State<WithdrawPage> {
             children: [
               const SectionLabel('จาก'),
               StreamBuilder<AccountModel>(
-                stream: BankService.instance.watchAccount(userId),
+                stream: AccountService.instance.watchAccount(userId),
                 builder: (context, snap) => snap.hasData
                     ? BalanceCard(account: snap.data!)
                     : const SizedBox(height: 160),

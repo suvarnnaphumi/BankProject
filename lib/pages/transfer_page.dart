@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../models/account_model.dart';
-import '../services/bank_service.dart';
+import '../services/account_service.dart';
+import '../services/auth_service.dart';
+import '../services/transfer_service.dart';
 import '../widgets/common.dart';
 import 'scan_page.dart';
 
@@ -24,7 +26,7 @@ class _TransferPageState extends State<TransferPage> {
   bool _searching = false;
   bool _sending = false;
 
-  String get _myAccount => BankService.instance.currentAccountNumber!;
+  String get _myAccount => AuthService.instance.currentAccountNumber!;
 
   @override
   void initState() {
@@ -52,7 +54,7 @@ class _TransferPageState extends State<TransferPage> {
     if (number.length != 10) return;
     setState(() => _searching = true);
     try {
-      final account = await BankService.instance.findAccount(number);
+      final account = await AccountService.instance.findAccount(number);
       if (!mounted || _accountNumber.text != number) return;
       setState(() => _receiver = account);
       if (account == null) {
@@ -109,7 +111,7 @@ class _TransferPageState extends State<TransferPage> {
 
     setState(() => _sending = true);
     try {
-      await BankService.instance.transfer(
+      await TransferService.instance.transfer(
         fromAccount: _myAccount,
         toAccount: receiver.accountNumber,
         amount: amount,
@@ -137,7 +139,7 @@ class _TransferPageState extends State<TransferPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = BankService.instance.currentUserId!;
+    final userId = AuthService.instance.currentUserId!;
 
     return Scaffold(
       appBar: AppBar(title: const Text('โอนเงิน')),
@@ -150,7 +152,7 @@ class _TransferPageState extends State<TransferPage> {
             children: [
               const SectionLabel('จาก'),
               StreamBuilder<AccountModel>(
-                stream: BankService.instance.watchAccount(userId),
+                stream: AccountService.instance.watchAccount(userId),
                 builder: (context, snap) => snap.hasData
                     ? BalanceCard(account: snap.data!)
                     : const SizedBox(height: 160),
@@ -226,23 +228,26 @@ class _ReceiverBox extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.person, color: brandColor, size: 40),
+          // รูปโปรไฟล์ของผู้รับ (ถ้ายังไม่ได้ตั้งรูป จะเป็นไอคอนคน)
+          ProfileAvatar(photo: account.photo, size: 48),
           const SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                account.name,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  account.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              Text(
-                formatAccountNumber(account.accountNumber),
-                style: const TextStyle(fontSize: 16),
-              ),
-            ],
+                Text(
+                  formatAccountNumber(account.accountNumber),
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
           ),
         ],
       ),

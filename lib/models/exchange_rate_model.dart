@@ -1,12 +1,11 @@
 /// อัตราแลกเปลี่ยนที่ได้จาก API ExchangeRate-API (https://open.er-api.com)
 class ExchangeRateModel {
-  /// อัตรา "1 บาท = x สกุลเงินนั้น" เช่น rates['USD'] = 0.0308
   final Map<String, double> rates;
   final DateTime lastUpdate;
 
   ExchangeRateModel({required this.rates, required this.lastUpdate});
 
-  /// แปลง JSON จาก API (เก็บเฉพาะสกุลเงินที่อยู่ใน [codes])
+  /// แปลง JSON จาก API (เก็บเฉพาะสกุลเงิน)
   factory ExchangeRateModel.fromJson(
     Map<String, dynamic> json,
     Iterable<String> codes,
@@ -25,7 +24,7 @@ class ExchangeRateModel {
     );
   }
 
-  /// 1 หน่วยของสกุลเงินนั้น = กี่บาท (เช่น 1 USD = 32.45 บาท)
+  /// 1 หน่วยของสกุลเงิน = กี่บาท
   double thbPerUnit(String currency) => 1 / rates[currency]!;
 
   /// แปลงเงินบาท -> สกุลเงินอื่น

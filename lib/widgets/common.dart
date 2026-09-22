@@ -1,9 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../models/account_model.dart';
-import '../services/bank_service.dart';
+import '../services/bank_exception.dart';
 
 // ---------------------------------------------------------------- สี (ตามไฟล์ bank_UI.pdf)
 
@@ -246,10 +248,28 @@ class ShadowCard extends StatelessWidget {
 /// การ์ดยอดเงินสีเขียว (ใช้ในหน้าหลัก, โอนเงิน, ถอนเงิน)
 class BalanceCard extends StatelessWidget {
   final AccountModel account;
-  const BalanceCard({super.key, required this.account});
+
+  /// โชว์รูปโปรไฟล์ด้านซ้ายของชื่อ (เปิดเฉพาะหน้าหลัก)
+  final bool showPhoto;
+
+  const BalanceCard({super.key, required this.account, this.showPhoto = false});
 
   @override
   Widget build(BuildContext context) {
+    final nameAndNumber = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          account.name,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+        ),
+        Text(
+          formatAccountNumber(account.accountNumber),
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
+    );
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 24),
@@ -260,14 +280,16 @@ class BalanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            account.name,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-          ),
-          Text(
-            formatAccountNumber(account.accountNumber),
-            style: const TextStyle(fontSize: 16),
-          ),
+          if (showPhoto)
+            Row(
+              children: [
+                ProfileAvatar(photo: account.photo, size: 56),
+                const SizedBox(width: 16),
+                Expanded(child: nameAndNumber),
+              ],
+            )
+          else
+            nameAndNumber,
           const SizedBox(height: 28),
           const Text('ยอดเงินคงเหลือ', style: TextStyle(fontSize: 16)),
           Text(
@@ -307,6 +329,67 @@ class ButtonLoading extends StatelessWidget {
       width: 22,
       height: 22,
       child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.black),
+    );
+  }
+}
+
+/// รูปโปรไฟล์วงกลม (ใช้ในแท็บตั้งค่า และแท็บสมาชิก)
+/// ถ้ายังไม่ได้ใส่รูป หรือหาไฟล์รูปไม่เจอ จะโชว์ไอคอนรูปคนแทน
+class ProfileAvatar extends StatelessWidget {
+  /// ที่อยู่ไฟล์รูปในโฟลเดอร์ assets เช่น 'assets/images/profile.png'
+  final String? imagePath;
+
+  /// รูปที่ได้จาก Firestore (ถ้ามี จะใช้อันนี้ก่อน imagePath)
+  final Uint8List? photo;
+  final double size;
+
+  const ProfileAvatar({super.key, this.imagePath, this.photo, this.size = 64});
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = Icon(Icons.person, size: size * 0.6, color: Colors.white);
+    final bytes = photo;
+    final path = imagePath;
+
+    final Widget image;
+    if (bytes != null) {
+      image = Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+        // ยอดเงินเปลี่ยนแล้วหน้าจอวาดใหม่ รูปจะไม่กระพริบ
+        gaplessPlayback: true,
+        errorBuilder: (_, _, _) => fallback,
+      );
+    } else if (path != null) {
+      image = Image.asset(
+        path,
+        fit: BoxFit.cover,
+        // ยังไม่มีไฟล์รูปนี้ -> โชว์ไอคอนคนแทน
+        errorBuilder: (_, _, _) => fallback,
+      );
+    } else {
+      image = fallback;
+    }
+
+    final hasImage = bytes != null || path != null;
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        color: brandColor,
+        shape: BoxShape.circle,
+      ),
+      // ขอบขาวเฉพาะตอนไม่มีรูป ให้เห็นวงกลมชัดบนการ์ดสีเขียว
+      // (ใช้ foregroundDecoration วาดทับด้านบน รูปจะไม่ถูกดันให้หดเล็กลง)
+      foregroundDecoration: hasImage
+          ? null
+          : BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+      // ClipOval ตัดรูปให้เป็นวงกลม, SizedBox.expand ให้รูปขยายเต็มวง
+      child: ClipOval(child: SizedBox.expand(child: image)),
     );
   }
 }

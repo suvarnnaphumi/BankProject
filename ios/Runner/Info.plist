@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ใช้รูปภาพในเครื่องเพื่อตั้งเป็นรูปโปรไฟล์</string>
 	<key>NSCameraUsageDescription</key>
 	<string>ใช้กล้องเพื่อสแกน QR code สำหรับโอนเงิน</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

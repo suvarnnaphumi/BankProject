@@ -5,9 +5,9 @@ import '../models/exchange_rate_model.dart';
 import '../services/exchange_rate_service.dart';
 import '../widgets/common.dart';
 
-/// หน้าอัตราแลกเปลี่ยน: ดึงข้อมูลจาก API ภายนอก + เครื่องแปลงค่าเงิน
+/// หน้าอัตราแลกเปลี่ยน: ดึงข้อมูลจาก API ภายนอก + แปลงค่าเงิน
 class ExchangeRatePage extends StatefulWidget {
-  /// ยอดเงินในบัญชี ใช้เป็นค่าเริ่มต้นของเครื่องแปลงค่าเงิน
+  /// ยอดเงินในบัญชี ใช้เป็นค่าเริ่มต้นของหน้าแปลงค่าเงิน
   final double balance;
   const ExchangeRatePage({super.key, required this.balance});
 
@@ -30,7 +30,7 @@ class _ExchangeRatePageState extends State<ExchangeRatePage> {
     try {
       await future;
     } catch (_) {
-      // FutureBuilder จะโชว์หน้า error ให้เอง
+      // จะโชว์หน้า error ให้เอง
     }
   }
 
@@ -89,7 +89,7 @@ class _RateTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = ExchangeRateService.currencies[code]!;
     final thb = rates.thbPerUnit(code);
-    // สกุลที่ค่าต่ำกว่า 1 บาท (เช่น วอน, กีบ) โชว์ทศนิยม 4 ตำแหน่ง
+    // สกุลที่ค่าต่ำกว่า 1 บาท โชว์ทศนิยม 4 ตำแหน่ง
     final text = thb < 1
         ? '${NumberFormat('#,##0.0000').format(thb)} ฿'
         : formatMoney(thb);
@@ -122,7 +122,7 @@ class _RateTile extends StatelessWidget {
   }
 }
 
-/// เครื่องแปลงค่าเงิน บาท <-> สกุลเงินที่เลือก
+/// แปลงค่าเงิน บาท <-> สกุลเงินที่เลือก
 class _Converter extends StatefulWidget {
   final ExchangeRateModel rates;
   final double initialThb;
@@ -200,7 +200,7 @@ class _ConverterState extends State<_Converter> {
                 ),
               ),
               IconButton(
-                tooltip: 'สลับทิศทาง',
+                tooltip: 'สลับค่าเงิน',
                 icon: const Icon(Icons.swap_horiz, size: 32),
                 onPressed: () => setState(() => _thbToForeign = !_thbToForeign),
               ),

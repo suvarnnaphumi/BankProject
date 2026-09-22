@@ -4,11 +4,13 @@ import '../models/account_model.dart';
 import '../widgets/common.dart';
 import 'exchange_rate_page.dart';
 import 'receive_page.dart';
+import 'savings_page.dart';
 import 'scan_page.dart';
+import 'tax_page.dart';
 import 'transfer_page.dart';
 import 'withdraw_page.dart';
 
-/// หน้าธุรกรรม: ปุ่มเมนู 5 ปุ่ม โอนเงิน, สแกน, รับเงิน, ถอนเงิน, ค่าเงิน
+/// หน้าธุรกรรม: ปุ่มเมนู 7 ปุ่ม โอนเงิน, สแกน, รับเงิน, ถอนเงิน, เงินออม, ภาษี, ค่าเงิน
 class MenuPage extends StatelessWidget {
   final AccountModel account;
   const MenuPage({super.key, required this.account});
@@ -46,6 +48,12 @@ class MenuPage extends StatelessWidget {
         'ถอนเงิน',
         () => _open(context, const WithdrawPage()),
       ),
+      (
+        Icons.savings,
+        'ออมเงิน',
+        () => _open(context, SavingsPage(account: account)),
+      ),
+      (Icons.receipt_long, 'คิดภาษี', () => _open(context, const TaxPage())),
       (
         Icons.swap_horiz,
         'ค่าเงิน',

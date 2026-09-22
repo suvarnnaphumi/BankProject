@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../services/bank_service.dart';
+import '../services/qr_service.dart';
 import '../widgets/common.dart';
 
 /// หน้าสแกน QR: เปิดกล้องสแกน QR แล้วส่งเลขบัญชี 10 หลักกลับไป
@@ -31,7 +31,7 @@ class _ScanPageState extends State<ScanPage> {
       if (raw == null) continue;
 
       // แปลงข้อความใน QR -> เลขบัญชี
-      final accountNumber = BankService.accountNumberFromQr(raw);
+      final accountNumber = QrService.accountNumberFrom(raw);
       if (accountNumber != null) {
         _done = true;
         Navigator.pop(context, accountNumber);

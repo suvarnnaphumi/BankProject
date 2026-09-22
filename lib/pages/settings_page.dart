@@ -1,7 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/account_model.dart';
-import '../services/bank_service.dart';
+import '../services/account_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/common.dart';
 import 'login_page.dart';
 
@@ -44,21 +48,29 @@ class SettingsPage extends StatelessWidget {
       children: [
         // ข้อมูลบัญชี
         ShadowCard(
-          padding: const EdgeInsets.fromLTRB(32, 20, 32, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+          child: Row(
             children: [
-              Text(
-                account.name,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
+              _ProfilePhotoPicker(photo: account.photo),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      account.name,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(account.email, style: const TextStyle(fontSize: 16)),
+                    Text(
+                      'เลขบัญชี ${formatAccountNumber(account.accountNumber)}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
                 ),
-              ),
-              Text(account.email, style: const TextStyle(fontSize: 16)),
-              Text(
-                'เลขบัญชี ${formatAccountNumber(account.accountNumber)}',
-                style: const TextStyle(fontSize: 16),
               ),
             ],
           ),
@@ -75,6 +87,107 @@ class SettingsPage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// รูปโปรไฟล์ที่กดได้: กดแล้วเลือกรูปใหม่จากเครื่อง หรือลบรูปออก
+class _ProfilePhotoPicker extends StatefulWidget {
+  final Uint8List? photo;
+  const _ProfilePhotoPicker({required this.photo});
+
+  @override
+  State<_ProfilePhotoPicker> createState() => _ProfilePhotoPickerState();
+}
+
+class _ProfilePhotoPickerState extends State<_ProfilePhotoPicker> {
+  bool _uploading = false;
+
+  Future<void> _showOptions() async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('เลือกรูปจากเครื่อง'),
+              onTap: () => Navigator.pop(context, 'pick'),
+            ),
+            if (widget.photo != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: dangerColor),
+                title: const Text(
+                  'ลบรูปโปรไฟล์',
+                  style: TextStyle(color: dangerColor),
+                ),
+                onTap: () => Navigator.pop(context, 'remove'),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (action == 'pick') await _pickPhoto();
+    if (action == 'remove') {
+      await _run(AccountService.instance.removeProfilePhoto);
+    }
+  }
+
+  Future<void> _pickPhoto() async {
+    // ย่อรูปตั้งแต่ตอนเลือก เหลือไม่เกิน 256x256 ไฟล์จะเหลือแค่ราวๆ 20KB
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 256,
+      maxHeight: 256,
+      imageQuality: 70,
+    );
+    if (file == null) return; // ผู้ใช้กดยกเลิก
+    final bytes = await file.readAsBytes();
+    await _run(() => AccountService.instance.updateProfilePhoto(bytes));
+  }
+
+  Future<void> _run(Future<void> Function() task) async {
+    setState(() => _uploading = true);
+    try {
+      await task();
+    } catch (e) {
+      if (mounted) showMessage(context, errorMessage(e), error: true);
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _uploading ? null : _showOptions,
+      child: Stack(
+        children: [
+          ProfileAvatar(photo: widget.photo, size: 72),
+          if (_uploading)
+            const Positioned.fill(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          // ไอคอนกล้องเล็กๆ มุมขวาล่าง บอกว่ากดเปลี่ยนรูปได้
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.black87,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.camera_alt,
+                size: 14,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -108,7 +221,7 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
       _error = null;
     });
     try {
-      await BankService.instance.deleteAccount(_password.text);
+      await AuthService.instance.deleteAccount(_password.text);
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
