@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../models/exchange_rate_model.dart';
 import '../services/exchange_rate_service.dart';
 import '../widgets/common.dart';
 
 /// หน้าอัตราแลกเปลี่ยน: ดึงข้อมูลจาก API ภายนอก + แปลงค่าเงิน
 class ExchangeRatePage extends StatefulWidget {
-  /// ยอดเงินในบัญชี ใช้เป็นค่าเริ่มต้นของหน้าแปลงค่าเงิน
+  // ยอดเงินในบัญชี ใช้เป็นค่าเริ่มต้นของหน้าแปลงค่าเงิน
   final double balance;
   const ExchangeRatePage({super.key, required this.balance});
 
