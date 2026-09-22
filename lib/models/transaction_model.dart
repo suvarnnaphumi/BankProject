@@ -44,7 +44,7 @@ class TransactionModel {
       'toName': toName,
       'amount': amount,
 
-      // (?to = ใส่ to ลงไปเฉพาะตอนที่ไม่เป็น null เช่น ถอนเงินจะมีแค่ [from])
+      // ?to = ใส่ to ลงไปเฉพาะตอนที่ไม่เป็น null
       'participants': [from, ?to],
       // ใช้เวลาของ server แทนเวลาในเครื่อง
       'createdAt': FieldValue.serverTimestamp(),
