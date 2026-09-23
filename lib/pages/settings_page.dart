@@ -245,32 +245,36 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
         'ลบบัญชี',
         style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'บัญชีและยอดเงินจะถูกลบทั้งหมด\nไม่สามารถกู้คืนได้',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'กรอกรหัสผ่านเพื่อยืนยัน',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _password,
-            obscureText: true,
-            enabled: !_loading,
-            decoration: InputDecoration(
-              hintText: 'รหัสผ่าน',
-              prefixIcon: const Icon(Icons.lock),
-              errorText: _error,
+      // คีย์บอร์ดเด้งขึ้นมาแล้ว popup จะเตี้ยลง ถ้าไม่ใส่ SingleChildScrollView
+      // เนื้อหาจะล้นจนขึ้นแถบเหลืองดำ ใส่แล้วจะเลื่อนดูแทน
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'บัญชีและยอดเงินจะถูกลบทั้งหมด\nไม่สามารถกู้คืนได้',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
             ),
-            onSubmitted: (_) => _delete(),
-          ),
-        ],
+            const SizedBox(height: 24),
+            const Text(
+              'กรอกรหัสผ่านเพื่อยืนยัน',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _password,
+              obscureText: true,
+              enabled: !_loading,
+              decoration: InputDecoration(
+                hintText: 'รหัสผ่าน',
+                prefixIcon: const Icon(Icons.lock),
+                errorText: _error,
+              ),
+              onSubmitted: (_) => _delete(),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
