@@ -44,7 +44,6 @@ class _WithdrawPageState extends State<WithdrawPage> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      // กรณีถอนเกินยอดคงเหลือ จะได้ข้อความ "เงินในบัญชีไม่เพียงพอ"
       await showResultDialog(
         context,
         success: false,

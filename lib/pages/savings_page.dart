@@ -10,7 +10,6 @@ import '../services/transaction_service.dart';
 import '../widgets/common.dart';
 
 /// หน้าบัญชีออม: ยอดเงินออม + ฝาก/ถอนเงินออมเอง + ประวัติ
-/// (เงินเข้ามาจากการปัดเศษอัตโนมัติ หรือฝากเองก็ได้)
 class SavingsPage extends StatelessWidget {
   final AccountModel account;
   const SavingsPage({super.key, required this.account});
@@ -140,7 +139,7 @@ class SavingsPage extends StatelessWidget {
   }
 }
 
-/// การ์ดยอดเงินออม (โทนเดียวกับ BalanceCard แต่แยกให้เห็นชัดว่าเป็นบัญชีออม)
+/// การ์ดยอดเงินออม 
 class _SavingsBalanceCard extends StatelessWidget {
   final AccountModel account;
   const _SavingsBalanceCard({required this.account});

@@ -1,5 +1,4 @@
-/// คำนวณภาษีเงินได้บุคคลธรรมดา สำหรับเงินเดือน (เงินได้ ม.40(1)) ตามหลักของกรมสรรพากร
-/// ใช้ประมาณการเพื่อวางแผนการเงินเท่านั้น ไม่ใช่คำแนะนำทางภาษีที่เป็นทางการ
+/// คำนวณภาษีเงิน
 library;
 
 import 'dart:math';
@@ -7,8 +6,8 @@ import 'dart:math';
 /// ขั้นบันไดภาษี 1 ขั้น
 class TaxBracket {
   final double from;
-  final double? to; // null = ไม่มีเพดาน (ขั้นสุดท้าย)
-  final double rate; // เช่น 0.05 = 5%
+  final double? to;
+  final double rate;
 
   const TaxBracket({required this.from, this.to, required this.rate});
 }
@@ -16,7 +15,7 @@ class TaxBracket {
 /// ผลการคิดภาษีใน 1 ขั้น
 class TaxBracketResult {
   final TaxBracket bracket;
-  final double taxableAmount; // เงินได้สุทธิส่วนที่ตกอยู่ในขั้นนี้
+  final double taxableAmount;
   final double tax;
 
   const TaxBracketResult({
@@ -25,20 +24,19 @@ class TaxBracketResult {
     required this.tax,
   });
 
-  /// เงินได้สุทธิถึงขั้นนี้หรือยัง
   bool get reached => taxableAmount > 0;
 }
 
 /// ข้อมูลที่ผู้ใช้กรอก
 class TaxInput {
   final double annualIncome;
-  final bool hasSpouse; // คู่สมรสไม่มีเงินได้
+  final bool hasSpouse;
   final int children;
-  final int parents; // บิดามารดาอายุ 60 ปีขึ้นไป รายได้ไม่เกิน 30,000/ปี
+  final int parents;
   final double socialSecurity;
   final double lifeInsurance;
   final double healthInsurance;
-  final double retirementFunds; // RMF + SSF + กองทุนสำรองเลี้ยงชีพ
+  final double retirementFunds;
   final double homeLoanInterest;
   final double donation;
 
@@ -56,7 +54,6 @@ class TaxInput {
   });
 }
 
-/// ค่าลดหย่อน 1 รายการ (หลังตัดตามเพดานแล้ว)
 class TaxAllowance {
   final String label;
   final double amount;
@@ -67,8 +64,8 @@ class TaxResult {
   final double totalIncome;
   final double expenseDeduction;
   final List<TaxAllowance> allowances;
-  final double netIncome; // เงินได้สุทธิ = ฐานที่เอาไปคิดภาษี
-  final List<TaxBracketResult> brackets; // ครบทุกขั้น (ขั้นที่ไม่ถึงภาษีเป็น 0)
+  final double netIncome;
+  final List<TaxBracketResult> brackets;
   final double totalTax;
 
   const TaxResult({
@@ -82,14 +79,11 @@ class TaxResult {
 
   double get totalAllowances => allowances.fold(0, (sum, a) => sum + a.amount);
 
-  /// เงินที่เหลือใช้หลังหักภาษี
   double get remaining => totalIncome - totalTax;
   double get remainingPerMonth => remaining / 12;
 
-  /// อัตราภาษีเฉลี่ย = ภาษีที่จ่ายจริง / เงินได้ทั้งปี
   double get effectiveRate => totalIncome <= 0 ? 0 : totalTax / totalIncome;
 
-  /// อัตราภาษีของขั้นสูงสุดที่เงินได้สุทธิไปถึง
   double get topRate => brackets
       .lastWhere((b) => b.reached, orElse: () => brackets.first)
       .bracket
@@ -100,25 +94,21 @@ class TaxService {
   TaxService._();
   static final instance = TaxService._();
 
-  // เพดานต่างๆ ตามหลักเกณฑ์กรมสรรพากร
-  static const double maxExpenseDeduction = 100000; // ค่าใช้จ่าย 50% ไม่เกินนี้
+  static const double maxExpenseDeduction = 100000;
   static const double personalAllowance = 60000;
   static const double spouseAllowance = 60000;
-  static const double childAllowance = 30000; // ต่อคน
-  static const double parentAllowance = 30000; // ต่อคน
-  static const int maxParents = 4; // พ่อแม่ตัวเอง + พ่อแม่คู่สมรส
-  // ประกันสังคม: ฐานค่าจ้างสูงสุด 17,500 x 5% x 12 เดือน (ใช้ตั้งแต่ปี 2569)
+  static const double childAllowance = 30000;
+  static const double parentAllowance = 30000;
+  static const int maxParents = 4;
   static const double maxSocialSecurity = 10500;
   static const double maxLifeInsurance = 100000;
   static const double maxHealthInsurance = 25000;
-  static const double maxLifeAndHealth = 100000; // ประกันชีวิต + สุขภาพ รวมกัน
-  static const double maxRetirementFunds = 500000; // RMF + SSF + PVD รวมกัน
-  static const double retirementIncomeRatio = 0.30; // และไม่เกิน 30% ของเงินได้
+  static const double maxLifeAndHealth = 100000; 
+  static const double maxRetirementFunds = 500000;
+  static const double retirementIncomeRatio = 0.30;
   static const double maxHomeLoanInterest = 100000;
-  // บริจาคไม่เกิน 10% ของเงินได้หลังหักค่าใช้จ่ายและค่าลดหย่อน
   static const double donationRatio = 0.10;
-
-  /// อัตราภาษีเงินได้บุคคลธรรมดาแบบขั้นบันได
+  
   static const List<TaxBracket> brackets = [
     TaxBracket(from: 0, to: 150000, rate: 0),
     TaxBracket(from: 150000, to: 300000, rate: 0.05),
@@ -130,17 +120,16 @@ class TaxService {
     TaxBracket(from: 5000000, rate: 0.35),
   ];
 
-  /// ตัดค่าให้อยู่ระหว่าง 0 ถึงเพดาน
   static double _cap(double value, double limit) =>
       value.clamp(0, max(0, limit)).toDouble();
 
   TaxResult calculate(TaxInput input) {
     final income = max(0.0, input.annualIncome);
 
-    // ขั้นที่ 2: หักค่าใช้จ่ายแบบเหมา 50% แต่ไม่เกิน 100,000
+    // ขั้นที่ 2
     final expense = min(income * 0.5, maxExpenseDeduction);
 
-    // ขั้นที่ 3: หักค่าลดหย่อน (ตัดตามเพดานของแต่ละรายการ)
+    // ขั้นที่ 3
     final parents = input.parents.clamp(0, maxParents);
     final life = _cap(input.lifeInsurance, maxLifeInsurance);
     final health = _cap(
@@ -178,7 +167,6 @@ class TaxService {
         ),
     ];
 
-    // เงินบริจาคต้องคิดทีหลังสุด เพราะเพดาน 10% คิดจากยอดที่หักรายการอื่นไปแล้ว
     final beforeDonation = max(
       0.0,
       income - expense - allowances.fold(0.0, (sum, a) => sum + a.amount),
@@ -186,13 +174,10 @@ class TaxService {
     final donation = _cap(input.donation, beforeDonation * donationRatio);
     if (donation > 0) allowances.add(TaxAllowance('เงินบริจาค', donation));
 
-    // ขั้นที่ 4: เงินได้สุทธิ
+    // ขั้นที่ 4
     final netIncome = beforeDonation - donation;
 
-    // ขั้นที่ 5: คิดภาษีทีละขั้นบันได
-    // แต่ละขั้นคิดเฉพาะเงินได้ส่วนที่อยู่ในช่วงของขั้นนั้น
-    // เช่น เงินได้สุทธิ 400,000 -> ขั้น 0-150,000 ได้ 150,000, ขั้น 150,000-300,000 ได้ 150,000,
-    //                          ขั้น 300,000-500,000 ได้ 100,000, ขั้นที่เหลือได้ 0
+    // ขั้นที่ 5
     final results = <TaxBracketResult>[];
     for (final b in brackets) {
       final width = (b.to ?? double.infinity) - b.from; // ความกว้างของขั้น

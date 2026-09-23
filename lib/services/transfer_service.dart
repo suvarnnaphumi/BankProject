@@ -11,7 +11,7 @@ class TransferService {
 
   final _db = FirebaseFirestore.instance;
 
-  /// โอนเงิน ใช้ Firestore transaction เพื่อให้หักเงิน/เพิ่มเงินพร้อมกันเสมอ
+  /// โอนเงินใช้ Firestore transaction
   Future<void> transfer({
     required String fromAccount,
     required String toAccount,
@@ -22,7 +22,6 @@ class TransferService {
       throw BankException('ไม่สามารถโอนเข้าบัญชีตัวเองได้');
     }
 
-    // เลขบัญชีไม่เคยเปลี่ยน จึงหา document ก่อนเริ่ม transaction ได้
     final fromRef = await AccountService.instance.refByAccountNumber(
       fromAccount,
     );
@@ -30,7 +29,6 @@ class TransferService {
     if (fromRef == null) throw BankException('ไม่พบบัญชีต้นทาง');
     if (toRef == null) throw BankException('ไม่พบบัญชีปลายทาง');
 
-    // คืนค่าข้อความ error ออกมาจาก transaction แทนการ throw ข้างใน
     final error = await _db.runTransaction<String?>((tx) async {
       final fromSnap = await tx.get(fromRef);
       final toSnap = await tx.get(toRef);

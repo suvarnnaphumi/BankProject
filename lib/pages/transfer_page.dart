@@ -9,7 +9,6 @@ import 'scan_page.dart';
 
 /// โอนเงิน: กรอกเลขบัญชีเอง หรือกดไอคอนสแกน QR (ซึ่งจะเติมเลขบัญชีให้อัตโนมัติ)
 class TransferPage extends StatefulWidget {
-  /// เลขบัญชีปลายทางที่ได้จากการสแกน QR (ถ้ามี จะใส่ไว้ในช่องให้เลย)
   final String? initialAccountNumber;
   const TransferPage({super.key, this.initialAccountNumber});
 
@@ -213,7 +212,6 @@ class _TransferPageState extends State<TransferPage> {
   }
 }
 
-/// กล่องสีเทาแสดงชื่อ + เลขบัญชีของผู้รับ
 class _ReceiverBox extends StatelessWidget {
   final AccountModel account;
   const _ReceiverBox({required this.account});

@@ -135,7 +135,7 @@ class _ProfilePhotoPickerState extends State<_ProfilePhotoPicker> {
   }
 
   Future<void> _pickPhoto() async {
-    // ย่อรูปตั้งแต่ตอนเลือก เหลือไม่เกิน 256x256 ไฟล์จะเหลือแค่ราวๆ 20KB
+    // ย่อรูปตั้งแต่ตอนเลือก เหลือไม่เกิน 256x256
     final file = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       maxWidth: 256,
@@ -192,7 +192,7 @@ class _ProfilePhotoPickerState extends State<_ProfilePhotoPicker> {
   }
 }
 
-/// Popup ยืนยันการลบบัญชี ต้องกรอกรหัสผ่านก่อน (คืนค่า true ถ้าลบสำเร็จ)
+/// Popup ยืนยันการลบบัญชี ต้องกรอกรหัสผ่านก่อน
 class _DeleteAccountDialog extends StatefulWidget {
   const _DeleteAccountDialog();
 
@@ -245,8 +245,7 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
         'ลบบัญชี',
         style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
       ),
-      // คีย์บอร์ดเด้งขึ้นมาแล้ว popup จะเตี้ยลง ถ้าไม่ใส่ SingleChildScrollView
-      // เนื้อหาจะล้นจนขึ้นแถบเหลืองดำ ใส่แล้วจะเลื่อนดูแทน
+
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

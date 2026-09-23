@@ -37,7 +37,10 @@ class MenuPage extends StatelessWidget {
         'โอนเงิน',
         () => _open(context, const TransferPage()),
       ),
-      (Icons.qr_code_scanner, 'สแกน', () => _scanAndTransfer(context)),
+      (
+        Icons.qr_code_scanner,
+        'สแกน',
+        () => _scanAndTransfer(context)),
       (
         Icons.qr_code_2,
         'รับเงิน',
@@ -53,7 +56,10 @@ class MenuPage extends StatelessWidget {
         'ออมเงิน',
         () => _open(context, SavingsPage(account: account)),
       ),
-      (Icons.receipt_long, 'คิดภาษี', () => _open(context, const TaxPage())),
+      (
+        Icons.receipt_long,
+        'คิดภาษี',
+        () => _open(context, const TaxPage())),
       (
         Icons.swap_horiz,
         'ค่าเงิน',

@@ -7,8 +7,7 @@ import '../services/tax_service.dart';
 import '../widgets/common.dart';
 
 /// หน้าคำนวณภาษีรายได้บุคคลธรรมดา (เงินเดือน)
-/// แสดงวิธีคิดทีละขั้น + ตารางขั้นบันได + ภาษีที่ต้องเสีย + เงินเหลือใช้
-/// ดึงยอดเงินที่โอนเข้าบัญชีทั้งปีนี้มาเป็นค่าเริ่มต้นของ "รายได้ทั้งปี" ให้อัตโนมัติ
+/// ดึงยอดเงินที่โอนเข้าบัญชีทั้งปีนี้มาเป็นค่าเริ่มต้นของให้อัตโนมัติ
 class TaxPage extends StatefulWidget {
   const TaxPage({super.key});
 
@@ -138,7 +137,7 @@ class _TaxCalculatorState extends State<_TaxCalculator> {
         ),
         const SizedBox(height: 8),
 
-        // ---------------------------------------------------- กรอกข้อมูล
+        // กรอกข้อมูล
         const SectionLabel('รายได้ทั้งปี (ขั้นที่ 1)'),
         _field(
           _income,
@@ -220,7 +219,7 @@ class _TaxCalculatorState extends State<_TaxCalculator> {
           helper: 'ไม่เกิน 10% ของรายได้หลังหักค่าใช้จ่ายและค่าลดหย่อน',
         ),
 
-        // ---------------------------------------------------- ผลลัพธ์
+        //ผลลัพธ์
         const SizedBox(height: 8),
         const SectionLabel('วิธีคำนวณ (ขั้นที่ 4)'),
         _StepsCard(result: result),
@@ -243,7 +242,7 @@ class _TaxCalculatorState extends State<_TaxCalculator> {
   }
 }
 
-// ---------------------------------------------------------------- ส่วนกรอกข้อมูล
+//ส่วนกรอกข้อมูล
 
 class _RowLabel extends StatelessWidget {
   final String title;
@@ -268,7 +267,6 @@ class _RowLabel extends StatelessWidget {
   }
 }
 
-/// ปุ่ม - จำนวน + สำหรับนับจำนวนคน
 class _Counter extends StatelessWidget {
   final String label;
   final String hint;
@@ -310,9 +308,8 @@ class _Counter extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------- ส่วนแสดงผล
+//แสดงผล
 
-/// แถว "ชื่อ ....... จำนวนเงิน"
 class _AmountRow extends StatelessWidget {
   final String label;
   final String value;
@@ -375,7 +372,7 @@ class _StepTitle extends StatelessWidget {
   }
 }
 
-/// ขั้นที่ 1-4: รายได้ -> หักค่าใช้จ่าย -> หักค่าลดหย่อน -> รายได้สุทธิ
+///ขั้นที่ 1-4: รายได้, หักค่าใช้จ่าย, หักค่าลดหย่อน, รายได้สุทธิ
 class _StepsCard extends StatelessWidget {
   final TaxResult result;
   const _StepsCard({required this.result});
@@ -416,7 +413,7 @@ class _StepsCard extends StatelessWidget {
   }
 }
 
-/// ขั้นที่ 5: ตารางขั้นบันไดภาษี แสดงครบทุกขั้น ขั้นที่ไม่ถึงเป็นสีจาง
+///ขั้นที่ 5: ตารางขั้นบันไดภาษี แสดงครบทุกขั้น ขั้นที่ไม่ถึงเป็นสีจาง
 class _BracketTable extends StatelessWidget {
   final TaxResult result;
   const _BracketTable({required this.result});
@@ -480,7 +477,6 @@ class _BracketRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final from = b.bracket.from;
     final to = b.bracket.to;
-    // ขั้นแรกเริ่มที่ 0 ขั้นต่อๆ ไปเริ่มที่ +1 เช่น 150,001 - 300,000
     final start = from == 0 ? '0' : _baht.format(from + 1);
     final range = to == null
         ? '${_baht.format(from + 1)} ขึ้นไป'
@@ -530,7 +526,7 @@ class _BracketRow extends StatelessWidget {
   }
 }
 
-/// ผลสุดท้าย: ภาษีสุทธิที่ต้องเสียของปีนี้
+///ผลสุดท้าย
 class _TaxSummary extends StatelessWidget {
   final TaxResult result;
   final int yearTh;
@@ -577,7 +573,6 @@ class _TaxSummary extends StatelessWidget {
   }
 }
 
-/// เงินเหลือใช้หลังหักภาษี ต่อปีและต่อเดือน
 class _RemainingCard extends StatelessWidget {
   final TaxResult result;
   const _RemainingCard({required this.result});

@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 final account = snap.data!;
-                // IndexedStack เก็บทุกแท็บไว้ สลับแท็บแล้วไม่ต้องโหลดใหม่
+
                 return IndexedStack(
                   index: _tab,
                   children: [
@@ -162,7 +162,6 @@ class _BottomBar extends StatelessWidget {
 }
 
 /// เนื้อหาแท็บหน้าหลัก
-
 class _HomeTab extends StatelessWidget {
   final AccountModel account;
   const _HomeTab({required this.account});

@@ -8,12 +8,10 @@ import 'account_service.dart';
 import 'bank_exception.dart';
 
 /// สมัครสมาชิก / เข้าสู่ระบบ / ออกจากระบบ / ลบบัญชี
-/// และจำว่าตอนนี้ใครล็อกอินอยู่ (currentUserId, currentAccountNumber)
 class AuthService {
   AuthService._();
   static final instance = AuthService._();
 
-  /// เงินเริ่มต้นที่ได้ตอนสมัครสมาชิก
   static const double startingBalance = 10000;
 
   final _auth = FirebaseAuth.instance;
@@ -22,13 +20,11 @@ class AuthService {
   CollectionReference<Map<String, dynamic>> get _users =>
       FirebaseFirestore.instance.collection(AccountModel.collectionName);
 
-  /// บัญชีที่ login อยู่ตอนนี้ (currentUserId = ID ของ document = อีเมล)
   String? currentUserId;
   String? currentAccountNumber;
 
   Future<String> _generateUniqueAccountNumber() async {
     while (true) {
-      // หลักแรกไม่เป็น 0 เพื่อให้ได้ 10 หลักเสมอ
       final number =
           (_random.nextInt(9) + 1).toString() +
           List.generate(9, (_) => _random.nextInt(10)).join();
@@ -37,14 +33,12 @@ class AuthService {
     }
   }
 
-  /// สมัครสมาชิก -> คืนค่าเลขบัญชีที่สุ่มได้
   /// อีเมล/รหัสผ่านเก็บใน Firebase Authentication ส่วนข้อมูลบัญชีเก็บใน Firestore
   Future<String> register({
     required String name,
     required String email,
     required String password,
   }) async {
-    // อีเมลซ้ำ Firebase Authentication จะแจ้ง error 'email-already-in-use' ให้เอง
     final UserCredential credential;
     try {
       credential = await _auth.createUserWithEmailAndPassword(
@@ -56,7 +50,6 @@ class AuthService {
     }
 
     try {
-      // ใช้อีเมล (ตัวพิมพ์เล็ก) เป็น ID ของ document
       final docId = credential.user!.email!;
       final accountNumber = await _generateUniqueAccountNumber();
       final account = AccountModel(
@@ -74,7 +67,6 @@ class AuthService {
       currentAccountNumber = accountNumber;
       return accountNumber;
     } catch (_) {
-      // บันทึกลง Firestore ไม่สำเร็จ -> ลบบัญชีใน Authentication ทิ้ง จะได้สมัครใหม่ได้
       await credential.user?.delete();
       rethrow;
     }
@@ -91,7 +83,7 @@ class AuthService {
       throw BankException(_authErrorMessage(e));
     }
 
-    // หาข้อมูลบัญชีใน Firestore จากอีเมล (ID ของ document)
+    // หาข้อมูลบัญชีใน Firestore จากอีเมล
     final docId = credential.user!.email!;
     final doc = await _users.doc(docId).get();
     if (!doc.exists) {
@@ -109,7 +101,6 @@ class AuthService {
   }
 
   /// ลบบัญชีผู้ใช้ถาวร: ลบข้อมูลใน Firestore และบัญชีใน Firebase Authentication
-  /// ต้องยืนยันรหัสผ่านก่อน เพราะ Firebase ไม่ให้ลบบัญชีถ้าล็อกอินไว้นานแล้ว
   Future<void> deleteAccount(String password) async {
     final user = _auth.currentUser;
     if (user == null) throw BankException('กรุณาเข้าสู่ระบบใหม่อีกครั้ง');
@@ -119,15 +110,12 @@ class AuthService {
         EmailAuthProvider.credential(email: user.email!, password: password),
       );
     } on FirebaseAuthException catch (e) {
-      // ตอนลบบัญชี อีเมลถูกต้องแน่นอน (ล็อกอินอยู่แล้ว) จึงบอกแค่ว่ารหัสผ่านผิด
       if (e.code == 'invalid-credential' || e.code == 'wrong-password') {
         throw BankException('รหัสผ่านไม่ถูกต้อง');
       }
       throw BankException(_authErrorMessage(e));
     }
 
-    // ลบข้อมูลบัญชีใน Firestore ก่อน แล้วค่อยลบบัญชีใน Authentication
-    // (ประวัติใน transactions ยังเก็บไว้ เพราะอีกฝ่ายยังต้องเห็นรายการของตัวเอง)
     await _users.doc(currentUserId).delete();
     try {
       await user.delete();
@@ -138,7 +126,6 @@ class AuthService {
     currentAccountNumber = null;
   }
 
-  /// แปลง error ของ Firebase Authentication เป็นข้อความภาษาไทย
   String _authErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':

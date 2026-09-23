@@ -11,20 +11,16 @@ class SavingsService {
 
   final _db = FirebaseFirestore.instance;
 
-  /// ย้ายเงินจากยอดเงินหลัก -> บัญชีออม
   Future<void> deposit({
     required String accountNumber,
     required double amount,
   }) => _move(accountNumber, amount, toSavings: true);
 
-  /// ย้ายเงินจากบัญชีออม -> ยอดเงินหลัก
   Future<void> withdraw({
     required String accountNumber,
     required double amount,
   }) => _move(accountNumber, amount, toSavings: false);
 
-  /// ย้ายเงินระหว่าง balance กับ savingsBalance ใน document เดียวกัน
-  /// ใช้ transaction เหมือนการโอน เงินจะได้ไม่หายถ้าเน็ตหลุดกลางคัน
   Future<void> _move(
     String accountNumber,
     double amount, {
@@ -38,7 +34,6 @@ class SavingsService {
       final snap = await tx.get(ref);
       final data = snap.data()!;
       final balance = (data['balance'] as num).toDouble();
-      // บัญชีเก่าอาจยังไม่มีช่อง savingsBalance -> ถือว่าเป็น 0
       final savings = (data['savingsBalance'] as num? ?? 0).toDouble();
 
       if (toSavings && amount > balance) return 'เงินในบัญชีไม่เพียงพอ';

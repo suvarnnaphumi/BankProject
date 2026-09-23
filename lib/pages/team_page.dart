@@ -4,7 +4,6 @@ import '../models/team_member_model.dart';
 import '../widgets/common.dart';
 
 /// แท็บสมาชิกในกลุ่ม: โชว์ชื่อ-นามสกุล, รหัสนิสิต, เลขที่
-// แก้ข้อมูลสมาชิกในกลุ่มตรงนี้
 const teamMembers = <TeamMemberModel>[
   TeamMemberModel(
     name: 'นาย สุวรรณภูมิ พรัดขำ',

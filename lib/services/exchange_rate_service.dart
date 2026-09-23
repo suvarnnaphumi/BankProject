@@ -24,7 +24,7 @@ class ExchangeRateService {
 
   ExchangeRateModel? _cache;
 
-  /// ดึงอัตราแลกเปลี่ยนล่าสุด (เก็บ cache ไว้ จะได้ไม่ต้องเรียก API ซ้ำทุกครั้ง)
+  /// ดึงอัตราแลกเปลี่ยนล่าสุด
   Future<ExchangeRateModel> getRates({bool forceRefresh = false}) async {
     if (_cache != null && !forceRefresh) return _cache!;
 
